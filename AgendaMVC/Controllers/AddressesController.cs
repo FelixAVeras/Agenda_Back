@@ -1,5 +1,6 @@
 ﻿using AgendaMVC.Data;
 using AgendaMVC.Models;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
@@ -17,6 +18,29 @@ namespace AgendaMVC.Controllers
             var addresses = db.Addresses.Include(a => a.Customer);
             return View(addresses.ToList());
         }
+
+        //public ActionResult Index(string customerAddress, string searchString)
+        //{
+        //    var customerList = new List<string>();
+        //    var customerQuery = from d in db.Addresses orderby d.Customer.FullName select d.Customer.FullName;
+
+        //    customerList.AddRange(customerQuery.Distinct());
+        //    ViewBag.customerAddress = new SelectList(customerList);
+
+        //    var direccion = from d in db.Addresses select d;
+
+        //    if (!string.IsNullOrEmpty(searchString))
+        //    {
+        //        direccion = direccion.Where(d => d.AddressDescription.ToLower().Contains(searchString.ToLower()));
+        //    }
+
+        //    if (!string.IsNullOrEmpty(customerAddress))
+        //    {
+        //        direccion = direccion.Where(x => x.Customer.FullName == customerAddress);
+        //    }
+
+        //    return View(direccion);
+        //}
 
         // GET: Addresses/Details/5
         public ActionResult Details(int? id)
