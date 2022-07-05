@@ -1,8 +1,15 @@
-﻿using Agenda_Back.Data;
-using Agenda_Back.Models;
+﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Web.Http;
+using System.Web.Http.Description;
+using Agenda_Back.Data;
+using Agenda_Back.Models;
 
 namespace Agenda_Back.Controllers
 {
@@ -10,57 +17,103 @@ namespace Agenda_Back.Controllers
     {
         private Agenda_BackContext db = new Agenda_BackContext();
 
-        public IQueryable<Customer> GetCustomers() 
+        // GET: api/Customers
+        public IQueryable<Customer> GetCustomers()
         {
-            return db.Customers.Include("Addresses");
+            return db.Customers;
         }
 
+        // GET: api/Customers/5
+        [ResponseType(typeof(Customer))]
         public IHttpActionResult GetCustomer(int id)
         {
-            IList<Customer> customers = db.Customers.Include("Address")
-                                                    .Where(c => c.CustomerID == id)
-                                                    .Select(c => new Customer()
-            {
-                CustomerID = c.CustomerID,
-                FirstName = c.FirstName,
-                LastName = c.LastName,
-                Address = c.Address == null ? null : new Address()
-                {
-                    CustomerID = c.Address.CustomerID,
-                    AddressID = c.Address.AddressID,
-                    AddressDescription = c.Address.AddressDescription
-                }
-            }).ToList<Customer>();
-
-            if (customers.Count == 0)
+            Customer customer = db.Customers.Find(id);
+            if (customer == null)
             {
                 return NotFound();
             }
 
-            return Ok(customers);
+            return Ok(customer);
         }
 
-        public IHttpActionResult PostCustomer(Customer model)
+        // PUT: api/Customers/5
+        [ResponseType(typeof(void))]
+        public IHttpActionResult PutCustomer(int id, Customer customer)
         {
-            if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            db.Customers.Add(new Customer() 
+            if (id != customer.CustomerID)
             {
-                CustomerID = model.CustomerID,
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                Address = model.Address == null ? null : new Address()
+                return BadRequest();
+            }
+
+            db.Entry(customer).State = EntityState.Modified;
+
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CustomerExists(id))
                 {
-                    AddressID = model.Address.AddressID,
-                    AddressDescription = model.Address.AddressDescription
+                    return NotFound();
                 }
-            });
+                else
+                {
+                    throw;
+                }
+            }
+
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        // POST: api/Customers
+        [ResponseType(typeof(Customer))]
+        public IHttpActionResult PostCustomer(Customer customer)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            db.Customers.Add(customer);
             db.SaveChanges();
 
-            return Ok();
+            return CreatedAtRoute("DefaultApi", new { id = customer.CustomerID }, customer);
+        }
+
+        // DELETE: api/Customers/5
+        [ResponseType(typeof(Customer))]
+        public IHttpActionResult DeleteCustomer(int id)
+        {
+            Customer customer = db.Customers.Find(id);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            db.Customers.Remove(customer);
+            db.SaveChanges();
+
+            return Ok(customer);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        private bool CustomerExists(int id)
+        {
+            return db.Customers.Count(e => e.CustomerID == id) > 0;
         }
     }
 }

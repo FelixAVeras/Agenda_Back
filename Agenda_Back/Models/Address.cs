@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Agenda_Back.Models
 {
@@ -14,7 +10,6 @@ namespace Agenda_Back.Models
         [Required]
         public string AddressDescription { get; set; }
 
-        public int CustomerID { get; set; }
-        public Customer Customer { get; set; }
+        public virtual Customer Customer { get; set; }
     }
 }

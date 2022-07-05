@@ -14,6 +14,6 @@ namespace Agenda_Back.Models
         [Required]
         public string LastName { get; set; }
 
-        public Address Address { get; set; }
+        public virtual List<Address> Address { get; set; }
     }
 }
